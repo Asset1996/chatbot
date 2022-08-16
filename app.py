@@ -1,11 +1,13 @@
+import os
+import re
 import json
+import requests
 from typing import Dict
 from flask import Flask
 from flask import request
 from flask import Response
 from dotenv import load_dotenv
 load_dotenv()
-import os, re
 
 app = Flask(__name__)
 application = app
@@ -34,7 +36,7 @@ def send_message(chat_id, text=''):
     url = os.getenv('SEND_MESSAGE_URL')
     payload = {'chat_id':chat_id, 'text':text}
 
-    response = request.post(url, json=payload)
+    response = requests.post(url, json=payload)
     return response
 
 @app.route("/", methods=['POST', 'GET'])
