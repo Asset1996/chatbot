@@ -1,6 +1,7 @@
 import os
 import json
 import telebot
+import requests
 from flask import Flask
 from flask import request
 from flask import Response
@@ -30,7 +31,11 @@ def index():
 
         bot.infinity_polling()
     else:
-        bot.set_webhook(url=os.getenv('SET_WEBHOOK_PATH'))
+        webhook_info = requests.get(url=os.getenv('GET_WEBHOOK_INFO_PATH'))
+        wh_info = webhook_info.json()
+        if not wh_info['result']['url']:
+            bot.set_webhook(url=os.getenv('SET_WEBHOOK_PATH'))
+        
         if request.method == 'POST':
             message = request.get_json()
             chat_id, text = (
