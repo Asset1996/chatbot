@@ -14,7 +14,7 @@ application = app
 
 def write_json(data, filename='response.json'):
     """Creates and writes the json data into the file with filename."""
-    with open(filename, 'w') as file:
+    with open(filename, 'a') as file:
         json.dump(data, file, indent=4, ensure_ascii=False)
 
 def parse_data(message:Dict):
