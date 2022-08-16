@@ -1,7 +1,6 @@
 import os
 import json
 import telebot
-from typing import Dict
 from flask import Flask
 from flask import request
 from flask import Response
@@ -22,19 +21,29 @@ def write_json(data, filename='response.json'):
 @app.route("/", methods=['POST', 'GET'])
 def index():
     """Main route function. Receives the message from telegram."""
-    if request.method == 'POST':
-        message = request.get_json()
-        chat_id, text = (
-            message['message']['chat']['id'],
-            message['message']['text'],
-        )
+    if os.getenv('DEBUG') == 'true':
+        bot.remove_webhook()
 
-        write_json(message, 't_message.json')
+        @bot.message_handler()
+        def admin_of_group(message):
+	        bot.send_message(message.chat.id, 'You got the DEV mode!')
 
-        bot.send_message(chat_id, 'Your message "{}" is saved in the DB'.format(text))
-        return Response('OK, it is POST', status=200)
+        bot.infinity_polling()
     else:
-        return os.getenv('SET_WEBHOOK_PATH')
+        bot.set_webhook(url=os.getenv('SET_WEBHOOK_PATH'))
+        if request.method == 'POST':
+            message = request.get_json()
+            chat_id, text = (
+                message['message']['chat']['id'],
+                message['message']['text'],
+            )
+
+            write_json(message, 't_message.json')
+
+            bot.send_message(chat_id, 'Your message "{}" is saved in the DB'.format(text))
+            return Response('OK, it is POST', status=200)
+        else:
+            return os.getenv('SET_WEBHOOK_PATH')
  
 if __name__ == "__main__":
     """Runner of the application."""
