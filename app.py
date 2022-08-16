@@ -1,7 +1,6 @@
 import os
 import json
 import telebot
-from handler import Handler
 from typing import Dict
 from flask import Flask
 from flask import request
@@ -13,27 +12,30 @@ app = Flask(__name__)
 application = app
 
 bot = telebot.TeleBot(os.getenv('TOKEN'))
-handle = Handler(bot)
 
 def write_json(data, filename='response.json'):
     """Creates and writes the json data into the file with filename."""
     with open(filename, 'a') as file:
         json.dump(data, file, indent=4, ensure_ascii=False)
 
+
 @app.route("/", methods=['POST', 'GET'])
 def index():
     """Main route function. Receives the message from telegram."""
-    if os.getenv("DEBUG") == 'true':
-        handle.start(request)
-        return Response('OK, it is DEBUG MODE', status=200)
+    if request.method == 'POST':
+        message = request.get_json()
+        chat_id, text = (
+            message['message']['chat']['id'],
+            message['message']['text'],
+        )
+
+        write_json(message, 't_message.json')
+
+        bot.send_message(chat_id, 'Your message "{}" is saved in the DB'.format(text))
+        return Response('OK, it is POST', status=200)
     else:
-        if request.method == 'POST':
-            handle.start(request)
-            return Response('OK, it is POST', status=200)
-        else:
-            return os.getenv('SET_WEBHOOK_PATH')
-        
+        return os.getenv('SET_WEBHOOK_PATH')
  
 if __name__ == "__main__":
     """Runner of the application."""
-    app.run(debug=True)
+    app.run()
