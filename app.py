@@ -46,11 +46,12 @@ def index():
         msg = request.get_json()
         chat_id, symbol = parse_data(msg)
 
+        write_json(msg, 'telegram_request.json')
+
         if not symbol:
             send_message(chat_id, 'Wrong data')
             return Response('OK', status=200)
 
-        write_json(msg, 'telegram_request.json')
         send_message(chat_id, 'Good command')
         return Response('OK, it is POST', status=200)
     else:
